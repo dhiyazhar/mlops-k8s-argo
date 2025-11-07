@@ -5,12 +5,8 @@ resource "digitalocean_vpc" "private_network" {
 }
 
 resource "digitalocean_firewall" "k3s" {
-  name = "k3s_firewall"
-
-  droplet_ids = [
-    digitalocean_droplet.control_plane.id,
-    digitalocean_droplet.worker.id
-  ]
+  name = "k3s-firewall"
+  tags = ["k3s-cluster"]
 
   inbound_rule {
     protocol         = "tcp"
@@ -38,32 +34,44 @@ resource "digitalocean_firewall" "k3s" {
 
   outbound_rule {
     protocol              = "tcp"
-    port_range            = "80"
+    port_range            = "1-65535"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
-
-  outbound_rule {
-    protocol              = "tcp"
-    port_range            = "443"
-    destination_addresses = ["0.0.0.0/0", "::/0"]
-  }
-
-  outbound_rule {
-    protocol              = "tcp"
-    port_range            = "53"
-    destination_addresses = ["0.0.0.0/0", "::/0"]
-  }
-
+  
   outbound_rule {
     protocol              = "udp"
-    port_range            = "53"
+    port_range            = "1-65535"
     destination_addresses = ["0.0.0.0/0", "::/0"]
   }
 
-  outbound_rule {
-    protocol              = "tcp"
-    port_range            = "6443"
-    destination_addresses = ["192.168.32.0/24"]
-  }
+#   outbound_rule {
+#     protocol              = "tcp"
+#     port_range            = "80"
+#     destination_addresses = ["0.0.0.0/0", "::/0"]
+#   }
+
+#   outbound_rule {
+#     protocol              = "tcp"
+#     port_range            = "443"
+#     destination_addresses = ["0.0.0.0/0", "::/0"]
+#   }
+
+#   outbound_rule {
+#     protocol              = "tcp"
+#     port_range            = "53"
+#     destination_addresses = ["0.0.0.0/0", "::/0"]
+#   }
+
+#   outbound_rule {
+#     protocol              = "udp"
+#     port_range            = "53"
+#     destination_addresses = ["0.0.0.0/0", "::/0"]
+#   }
+
+#   outbound_rule {
+#     protocol              = "tcp"
+#     port_range            = "6443"
+#     destination_addresses = ["192.168.32.0/24"]
+#   }
 
 }
