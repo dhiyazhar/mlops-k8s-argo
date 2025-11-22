@@ -1,0 +1,79 @@
+---
+- name: Test SSH Connection
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Wait for SSH to be ready
+      wait_for_connection:
+        timeout: 60
+        
+    - name: Ping test
+      ping:
+
+- name: Setup Control Plane 
+  hosts: control_plane
+  become: true
+
+  tasks:
+  - name: Wait for cloud-init to finish
+    wait_for:
+      path: /var/lib/cloud/instance/boot-finished
+      timeout: 300
+    ignore_errors: yes
+
+  - name: Update apt
+    become: true
+    apt:
+      update_cache: yes
+
+  - name: Install curl
+    apt:
+      name: curl
+      state: present
+  
+  - name: Installing k3s on Control Plane
+    shell: | 
+      curl -sfL https://get.k3s.io | sh -s - \
+      --write-kubeconfig-mode 644 \
+      --token {{ k3s_token }} \
+      --tls-san "{{ control_plane_ip }}"
+    args:
+      creates: /usr/local/bin/k3s
+
+- name: Setup k3s worker
+  hosts: worker
+  become: true
+  tasks:
+  - name: Wait for cloud-init to complete
+    wait_for:
+      path: /var/lib/cloud/instance/boot-finished
+      timeout: 300
+    ignore_errors: yes
+
+  - name: Update apt
+    apt:
+      update_cache: yes
+  
+  - name: Install curl
+    apt:
+      name: curl
+      state: present
+  
+  - name: Wait for Control Plane API to be ready
+    uri:
+      url: "https://{{ control_plane_ip }}:6443/ping"
+      validate_certs: no
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 60
+    delay: 5
+  
+  - name: Install k3s on worker and join to cluster
+    shell: |
+      curl -sfL https://get.k3s.io | K3S_URL=https://{{ control_plane_ip }}:6443 \
+      K3S_TOKEN={{ k3s_token }} sh -
+    args:
+      creates: /usr/local/bin/k3s
+
+

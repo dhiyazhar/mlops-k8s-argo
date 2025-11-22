@@ -1,0 +1,42 @@
+mode: standalone
+replicas: 1
+
+rootUser: ${minio_root_user}
+rootPassword: ${minio_root_password}
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: local-path
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+service:
+  type: ClusterIP
+  port: 9000
+
+consoleService:
+  type: ClusterIP
+  port: 9001
+
+buckets:
+  - name: argo-artifacts
+    policy: none
+    purge: false
+
+users:
+  - accessKey: ${minio_root_user}
+    secretKey: ${minio_root_password}
+    policy: readwrite
+
+# buckets: []
+# users: []
+
+makeBucketJob:
+  enabled: true
+
+makeUserJob:
+  enabled: true

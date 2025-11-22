@@ -1,5 +1,8 @@
 # -----------------------------------------TERRAFORM ------------------------------------------------
 
+*.ini
+kubeconfig
+
 # Local .terraform directories
 .terraform/
 
