@@ -8,7 +8,7 @@ resource "local_file" "ansible_inventory" {
 
         [all:vars]
         ansible_user=root
-        ansible_ssh_private_key_file=~/.ssh/id_ed25519_terraform_do
+        ansible_ssh_private_key_file=${var.pvt_key}
     EOT
 
   filename = "${path.module}/inventory.ini"
@@ -36,7 +36,7 @@ resource "null_resource" "fetch_kubeconfig" {
   provisioner "local-exec" {
     command = <<-EOT
             scp -o StrictHostKeyChecking=no \
-            -i ~/.ssh/id_ed25519_terraform_do \
+            -i ${var.pvt_key} \
             root@${digitalocean_droplet.control_plane.ipv4_address}:/etc/rancher/k3s/k3s.yaml \
             ./kubeconfig
             

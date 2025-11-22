@@ -22,21 +22,11 @@ consoleService:
   type: ClusterIP
   port: 9001
 
-buckets:
-  - name: argo-artifacts
-    policy: none
-    purge: false
-
-users:
-  - accessKey: ${minio_root_user}
-    secretKey: ${minio_root_password}
-    policy: readwrite
-
-# buckets: []
-# users: []
+buckets: []
+users: []
 
 makeBucketJob:
-  enabled: true
+  enabled: false
 
 makeUserJob:
-  enabled: true
+  enabled: false
